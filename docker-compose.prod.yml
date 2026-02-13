@@ -1,0 +1,26 @@
+services:
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+
+  app:
+#    build: .
+    image: glyph8/counter-app:latest
+#    ports:
+#      - "8080:8080"
+
+    environment:
+      REDIS_HOST: redis
+    depends_on:
+      - redis
+
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx.backend.conf:/etc/nginx/nginx.conf:ro
+
+    depends_on:
+      - app

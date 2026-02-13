@@ -44,7 +44,7 @@ jobs:
           echo "${{ secrets.SSH_PRIVATE_KEY }}" > key.pem
           chmod 600 key.pem
           
-          scp -i key.pem -o StrictHostKeyChecking=no docker-compose.yml ubuntu@13.125.211.126:/home/ubuntu/docker-compose.yml
+          scp -i key.pem -o StrictHostKeyChecking=no docker-compose.prod.yml ubuntu@13.125.211.126:/home/ubuntu/docker-compose.yml
           
           ssh -i key.pem -o StrictHostKeyChecking=no ubuntu@13.125.211.126 "
             docker pull ${{ secrets.DOCKER_USERNAME }}/counter-app:latest
