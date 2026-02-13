@@ -43,7 +43,7 @@ jobs:
         run: |
           echo "${{ secrets.SSH_PRIVATE_KEY }}" > key.pem
           chmod 600 key.pem
-          ssh -i key.pem -o StrictHostKeyChecking=no ubuntu@43.201.123.45 "
+          ssh -i key.pem -o StrictHostKeyChecking=no ubuntu@13.125.211.126 "
             docker pull ${{ secrets.DOCKER_USERNAME }}/counter-app:latest
             docker-compose up -d
           "
