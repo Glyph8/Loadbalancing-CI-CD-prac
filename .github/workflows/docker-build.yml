@@ -50,5 +50,5 @@ jobs:
           ssh -i key.pem -o StrictHostKeyChecking=no ubuntu@13.125.211.126 "
             cd /home/ubuntu
             docker pull ${{ secrets.DOCKER_USERNAME }}/counter-app:latest
-            docker-compose up -d
+            docker compose up -d --force-recreate
           "
