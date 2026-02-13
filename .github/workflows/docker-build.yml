@@ -44,15 +44,17 @@ jobs:
           echo "${{ secrets.SSH_PRIVATE_KEY }}" > key.pem
           chmod 600 key.pem
 
-          # docker-compose.yml 파일 전송
-          scp -i key.pem -o StrictHostKeyChecking=no docker-compose.prod.yml ubuntu@13.125.211.126:/home/ubuntu/docker-compose.prod.yml
+          # 이렇게 해야 옛날 파일이 덮어씌워지고, docker compose 명령어가 이 파일을 인식합니다.
+          scp -i key.pem -o StrictHostKeyChecking=no docker-compose.prod.yml ubuntu@13.125.211.126:/home/ubuntu/docker-compose.yml
+
+          scp -i key.pem -o StrictHostKeyChecking=no nginx.backend.conf ubuntu@13.125.211.126:/home/ubuntu/nginx.backend.conf
 
           ssh -i key.pem -o StrictHostKeyChecking=no ubuntu@13.125.211.126 "
             sudo systemctl stop nginx || true
             sudo systemctl disable nginx || true
 
             docker compose down || true
-
             docker pull ${{ secrets.DOCKER_USERNAME }}/counter-app:latest
+
             docker compose up -d --force-recreate
           "
