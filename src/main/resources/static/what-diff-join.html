@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SQL JOIN 시각적 가이드</title>
+    <style>
+        :root {
+            --primary: #3498db;
+            --secondary: #e74c3c;
+            --bg: #f4f7f6;
+            --table-left: #d1ecf1;
+            --table-right: #f8d7da;
+            --highlight: #fff3cd;
+        }
+
+        body {
+            font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+            line-height: 1.6;
+            background-color: var(--bg);
+            color: #333;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+
+        h1 { text-align: center; color: #2c3e50; }
+        h2 { border-left: 5px solid var(--primary); padding-left: 15px; margin-top: 40px; }
+
+        .raw-data {
+            display: flex;
+            justify-content: space-around;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            margin-bottom: 20px;
+            font-size: 0.9em;
+        }
+
+        th, td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: center;
+        }
+
+        th { background-color: #eee; }
+
+        .table-a { background-color: var(--table-left); }
+        .table-b { background-color: var(--table-right); }
+
+        .sql-box {
+            background: #2d3436;
+            color: #fab1a0;
+            padding: 15px;
+            border-radius: 8px;
+            font-family: 'Courier New', Courier, monospace;
+            margin: 15px 0;
+        }
+
+        .visual-box {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 30px;
+            margin: 20px 0;
+            padding: 20px;
+            background: #f9f9f9;
+            border-radius: 10px;
+        }
+
+        .venn {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0.7;
+            font-weight: bold;
+        }
+
+        .venn-left { border: 3px solid var(--primary); margin-right: -50px; }
+        .venn-right { border: 3px solid var(--secondary); }
+
+        /* Inner Join Highlight */
+        .inner-active .venn-left { background: var(--primary); clip-path: circle(50% at 83%); }
+        .inner-active .venn-right { background: var(--primary); clip-path: circle(50% at 17%); }
+
+        /* Left Join Highlight */
+        .left-active .venn-left { background: var(--primary); opacity: 0.8; }
+        .left-active .venn-right { background: var(--primary); clip-path: circle(50% at 17%); opacity: 0.8; }
+
+        .null-cell { color: #aaa; font-style: italic; }
+
+        .badge {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-weight: bold;
+            font-size: 0.8em;
+        }
+        .badge-a { background: var(--table-left); }
+        .badge-b { background: var(--table-right); }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>SQL JOIN 시각적 가이드</h1>
+
+    <p style="text-align: center; color: #666;">두 개의 테이블을 합칠 때, 어떤 데이터를 남길 것인가?</p>
+
+    <!-- 원본 데이터 -->
+    <div class="raw-data">
+        <div style="flex: 1;">
+            <h3>Table A: <span class="badge badge-a">Users</span></h3>
+            <table>
+                <tr><th>ID</th><th>이름</th></tr>
+                <tr><td>1</td><td>김철수</td></tr>
+                <tr><td>2</td><td>이영희</td></tr>
+                <tr style="outline: 2px solid #ff7675;"><td>3</td><td>박지성</td></tr>
+            </table>
+        </div>
+        <div style="flex: 1;">
+            <h3>Table B: <span class="badge badge-b">Orders</span></h3>
+            <table>
+                <tr><th>UserID</th><th>상품</th></tr>
+                <tr><td>1</td><td>사과</td></tr>
+                <tr><td>2</td><td>포도</td></tr>
+                <tr style="outline: 2px solid #ff7675;"><td>4</td><td>수박</td></tr>
+            </table>
+        </div>
+    </div>
+
+    <hr>
+
+    <!-- INNER JOIN 섹션 -->
+    <section>
+        <h2>1. INNER JOIN (교집합)</h2>
+        <p>양쪽 테이블에 <strong>모두 존재하는</strong> 데이터만 합칩니다. 연결고리가 없는 데이터는 버려집니다.</p>
+
+        <div class="visual-box inner-active">
+            <div class="venn venn-left">A</div>
+            <div class="venn venn-right" style="border-left: none;">B</div>
+        </div>
+
+        <div class="sql-box">
+            SELECT * FROM Users<br>
+            <strong>INNER JOIN</strong> Orders ON Users.ID = Orders.UserID;
+        </div>
+
+        <table>
+            <thead>
+            <tr><th>ID</th><th>이름</th><th>상품</th></tr>
+            </thead>
+            <tbody>
+            <tr><td>1</td><td>김철수</td><td>사과</td></tr>
+            <tr><td>2</td><td>이영희</td><td>포도</td></tr>
+            </tbody>
+        </table>
+        <p><small>* 박지성(ID 3)과 수박(ID 4)은 짝이 없어서 결과에서 제외되었습니다.</small></p>
+    </section>
+
+    <!-- LEFT JOIN 섹션 -->
+    <section>
+        <h2>2. LEFT (OUTER) JOIN (왼쪽 기준)</h2>
+        <p><strong>왼쪽 테이블(A)의 모든 데이터</strong>를 가져오고, 오른쪽 테이블(B)에서 일치하는 데이터가 있으면 붙입니다. 없으면 <span class="null-cell">NULL</span>로 표시합니다.</p>
+
+        <div class="visual-box left-active">
+            <div class="venn venn-left">A</div>
+            <div class="venn venn-right">B</div>
+        </div>
+
+        <div class="sql-box">
+            SELECT * FROM Users<br>
+            <strong>LEFT JOIN</strong> Orders ON Users.ID = Orders.UserID;
+        </div>
+
+        <table>
+            <thead>
+            <tr><th>ID</th><th>이름</th><th>상품</th></tr>
+            </thead>
+            <tbody>
+            <tr><td>1</td><td>김철수</td><td>사과</td></tr>
+            <tr><td>2</td><td>이영희</td><td>포도</td></tr>
+            <tr style="background-color: var(--highlight);">
+                <td>3</td>
+                <td>박지성</td>
+                <td class="null-cell">NULL</td>
+            </tr>
+            </tbody>
+        </table>
+        <p><small>* 박지성(ID 3)은 주문 내역이 없지만, 왼쪽(Users) 테이블 기준이므로 그대로 나타납니다.</small></p>
+    </section>
+
+    <div style="margin-top: 50px; padding: 20px; background: #eee; border-radius: 8px;">
+        <h3>💡 요약하자면?</h3>
+        <ul>
+            <li><strong>INNER JOIN:</strong> "너랑 나랑 둘 다 있는 것만!" (교집합)</li>
+            <li><strong>LEFT JOIN:</strong> "일단 내(왼쪽) 건 다 보여주고, 네(오른쪽) 건 있는 것만 가져와!"</li>
+        </ul>
+    </div>
+</div>
+
+</body>
+</html>
